@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagnóstico de Churn — Inner Space</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink:       #F35695;
+      --pink-light: #fde8f1;
+      --pink-dark:  #d43a78;
+      --black:      #1a1a1a;
+      --gray-bg:    #f5f5f5;
+      --gray-dark:  #ffffff;
+      --gray-mid:   #e0e0e0;
+      --gray:       #666666;
+      --gray-light: #f5f5f5;
+      --beige:      #F1EDE2;
+      --white:      #ffffff;
+      --red:        #e63946;
+      --orange:     #f4821f;
+      --green:      #2a9d5c;
+      --radius:     10px;
+      --radius-pill: 99999px;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--gray-bg);
+      color: var(--black);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── HEADER (estilo Inner) ─── */
+    header {
+      background: var(--white);
+      border-bottom: 1px solid #eee;
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: none;
+    }
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: -0.06em;
+      color: var(--black);
+      text-transform: lowercase;
+    }
+    .logo span {
+      color: var(--black);
+      font-weight: 400;
+      letter-spacing: -0.06em;
+    }
+    .header-badge {
+      background: var(--pink);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 20px;
+      border-radius: 8px;
+    }
+
+    /* ─── LAYOUT (full width estilo Inner) ─── */
+    main { max-width: 100%; margin: 0; padding: 0; }
+
+    /* ─── HERO (estilo Inner: fondo crema, título fuerte) ─── */
+    .hero {
+      text-align: center;
+      padding: 40px 40px 32px;
+      background: var(--beige);
+      width: 100%;
+    }
+    .hero-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--pink);
+      margin-bottom: 8px;
+    }
+    .hero h1 {
+      font-size: clamp(24px, 2.8vw, 34px);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      color: var(--black);
+    }
+    .hero h1 em { color: var(--pink); font-style: normal; }
+    .hero p {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--gray);
+      max-width: 560px;
+      margin: 0 auto 12px;
+    }
+    .hero-meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: #888;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+    /* ─── BANDA ROSA (como "¿Tu programa ideal?" en Inner) ─── */
+    .band-pink {
+      background: var(--pink);
+      color: var(--white);
+      padding: 14px 40px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      width: 100%;
+    }
+
+    /* ─── SECCIONES CON FONDO (alternar crema / blanco) ─── */
+    .slide section { padding: 28px 40px 32px; width: 100%; max-width: 1600px; margin: 0 auto; }
+    .slide section.bg-cream { background: var(--beige); }
+    .slide section.bg-white { background: var(--white); }
+    .slide section.bg-gray { background: var(--gray-bg); }
+
+    /* ─── SECTION ─── */
+    section { margin-bottom: 36px; }
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--pink);
+      margin-bottom: 6px;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--pink);
+      border-radius: 2px;
+    }
+    h2 {
+      font-size: clamp(20px, 2.2vw, 28px);
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    h2 em { color: var(--pink); font-style: normal; }
+    .section-sub {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 20px;
+      max-width: 680px;
+    }
+
+    /* ─── KPI GRID ─── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .kpi {
+      background: var(--gray-dark);
+      border: 1px solid #e5e5e5;
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .kpi::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--pink);
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .kpi.red::before  { background: var(--red); }
+    .kpi.orange::before { background: var(--orange); }
+    .kpi.green::before  { background: var(--green); }
+    .kpi-number {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .kpi.red .kpi-number    { color: var(--red); }
+    .kpi.orange .kpi-number { color: var(--orange); }
+    .kpi.green .kpi-number  { color: var(--green); }
+    .kpi.pink .kpi-number   { color: var(--pink); }
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 2px;
+    }
+    .kpi-sub {
+      font-size: 11px;
+      color: #777;
+    }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--gray-dark);
+      border: 1px solid #e5e5e5;
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card h3 .badge {
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .card h4 { font-size: 14px; }
+    .badge-red    { background: rgba(230,57,70,0.15);   color: #e63946; border: 1px solid rgba(230,57,70,0.3); }
+    .badge-orange { background: rgba(244,130,31,0.15);  color: #f4821f; border: 1px solid rgba(244,130,31,0.3); }
+    .badge-green  { background: rgba(42,157,92,0.15);   color: #2a9d5c; border: 1px solid rgba(42,157,92,0.3); }
+    .badge-pink   { background: rgba(243,86,149,0.15);  color: var(--pink); border: 1px solid rgba(243,86,149,0.3); }
+
+    /* ─── TABLE ─── */
+    .table-wrap { overflow-x: auto; margin: 10px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { border-bottom: 1px solid #ddd; }
+    thead th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+    }
+    tbody tr { border-bottom: 1px solid #eee; transition: background 0.15s; }
+    tbody tr:hover { background: #f8f8f8; }
+    tbody td { padding: 8px 12px; color: #555; }
+    tbody td:first-child { font-weight: 600; color: #1a1a1a; }
+    .td-highlight { color: var(--pink) !important; font-weight: 700 !important; }
+    .td-red    { color: var(--red) !important; font-weight: 700 !important; }
+    .td-orange { color: var(--orange) !important; font-weight: 700 !important; }
+    .td-green  { color: var(--green) !important; font-weight: 700 !important; }
+
+    /* ─── BAR CHART ─── */
+    .bar-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
+    .bar-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .bar-label { width: 180px; flex-shrink: 0; color: #555; font-weight: 500; }
+    .bar-track { flex: 1; background: #ececec; border-radius: 4px; height: 6px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; background: var(--pink); }
+    .bar-fill.red    { background: var(--red); }
+    .bar-fill.orange { background: var(--orange); }
+    .bar-fill.green  { background: var(--green); }
+    .bar-value { width: 70px; text-align: right; font-weight: 700; font-size: 12px; color: #1a1a1a; }
+
+    /* ─── JOURNEY ─── */
+    .journey {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      padding: 8px 0 16px;
+    }
+    .journey-step {
+      flex: 1;
+      min-width: 140px;
+      position: relative;
+      padding: 14px 10px 14px 14px;
+    }
+    .journey-step::after {
+      content: '→';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #bbb;
+      font-size: 20px;
+      z-index: 2;
+    }
+    .journey-step:last-child::after { display: none; }
+    .journey-step-inner {
+      background: var(--gray-dark);
+      border: 1px solid #e5e5e5;
+      border-radius: var(--radius);
+      padding: 14px;
+      height: 100%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .journey-step.critical .journey-step-inner {
+      border-color: rgba(230,57,70,0.4);
+      background: rgba(230,57,70,0.05);
+    }
+    .journey-step.warning .journey-step-inner {
+      border-color: rgba(244,130,31,0.4);
+      background: rgba(244,130,31,0.05);
+    }
+    .journey-step.intervention .journey-step-inner {
+      border-color: rgba(243,86,149,0.5);
+      background: rgba(243,86,149,0.07);
+    }
+    .journey-day {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .journey-step.critical .journey-day   { color: var(--red); }
+    .journey-step.warning .journey-day    { color: var(--orange); }
+    .journey-step.intervention .journey-day { color: var(--pink); }
+    .journey-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .journey-desc { font-size: 11px; color: #777; line-height: 1.4; }
+
+    /* ─── NEXT STEPS ─── */
+    .next-steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .action-card {
+      background: var(--gray-dark);
+      border: 1px solid #e5e5e5;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .action-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+    }
+    .action-card.p1::before { background: var(--red); }
+    .action-card.p2::before { background: var(--orange); }
+    .action-card.p3::before { background: var(--green); }
+    .action-priority {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .action-card.p1 .action-priority { color: var(--red); }
+    .action-card.p2 .action-priority { color: var(--orange); }
+    .action-card.p3 .action-priority { color: var(--green); }
+    .action-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .action-card p {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .action-detail {
+      font-size: 11px;
+      color: #666;
+      border-top: 1px solid #e5e5e5;
+      padding-top: 10px;
+      line-height: 1.6;
+    }
+    .action-detail strong { color: #444; }
+
+    /* ─── ALERT BOX ─── */
+    .alert {
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin: 14px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .alert.red    { background: rgba(230,57,70,0.08);  border: 1px solid rgba(230,57,70,0.25); }
+    .alert.orange { background: rgba(244,130,31,0.08); border: 1px solid rgba(244,130,31,0.25); }
+    .alert.pink   { background: rgba(243,86,149,0.08); border: 1px solid rgba(243,86,149,0.25); }
+    .alert-icon { font-size: 18px; flex-shrink: 0; }
+    .alert-content { font-size: 13px; line-height: 1.5; }
+    .alert-content strong { font-weight: 700; display: block; margin-bottom: 2px; }
+    .alert.red strong    { color: var(--red); }
+    .alert.orange strong { color: var(--orange); }
+    .alert.pink strong   { color: var(--pink); }
+
+    /* ─── DIVIDER ─── */
+    hr {
+      border: none;
+      border-top: 1px solid #e5e5e5;
+      margin: 56px 0;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding: 48px 24px;
+      border-top: 1px solid #e5e5e5;
+      color: #888;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+    footer span { color: var(--pink); }
+
+    /* ─── GRID 2 ─── */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    /* ─── HIGHLIGHT QUOTE ─── */
+    .highlight-quote {
+      background: var(--beige);
+      color: #1a1a1a;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 14px 0;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+      border-left: 4px solid var(--pink);
+    }
+    .highlight-quote em { color: var(--pink); font-style: normal; }
+
+    /* ─── NUMBER LIST ─── */
+    .num-list { list-style: none; counter-reset: steps; margin: 10px 0; }
+    .num-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 12px;
+      color: #555;
+    }
+    .num-list li:last-child { border-bottom: none; }
+    .num-list li::before {
+      content: counter(steps);
+      background: var(--pink);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ─── SLIDESHOW ─── */
+    .slide { display: none; }
+    .slide.active { display: block; }
+
+    .slide-nav {
+      position: sticky;
+      top: 54px;
+      z-index: 90;
+      background: var(--white);
+      border-bottom: 1px solid #eee;
+      padding: 0 40px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .slide-tabs {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .slide-tabs::-webkit-scrollbar { display: none; }
+    .slide-tab {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--black);
+      padding: 12px 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      white-space: nowrap;
+      transition: color 0.2s, background 0.2s;
+      background: transparent;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .slide-tab:hover { color: var(--pink); background: rgba(243,86,149,0.08); }
+    .slide-tab.active { color: var(--white); background: var(--pink); }
+    .slide-arrows { display: flex; gap: 8px; flex-shrink: 0; }
+    .slide-btn {
+      background: none;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      font-size: 16px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .slide-btn:hover { background: #f5f5f5; color: #1a1a1a; }
+    .slide-btn:disabled { opacity: 0.3; cursor: default; }
+    .slide-counter {
+      font-size: 11px;
+      font-weight: 700;
+      color: #aaa;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">inner <span>space</span></div>
+  <div class="header-badge">Diagnóstico de Churn · Marzo 2026</div>
+</header>
+
+<!-- SLIDE NAV -->
+<nav class="slide-nav" id="slideNav">
+  <div class="slide-tabs">
+    <button class="slide-tab active" onclick="goToSlide(0)">1 · Resumen</button>
+    <button class="slide-tab" onclick="goToSlide(1)">2 · Leads</button>
+    <button class="slide-tab" onclick="goToSlide(2)">3 · Suscriptoras</button>
+    <button class="slide-tab" onclick="goToSlide(3)">4 · Contenido</button>
+    <button class="slide-tab" onclick="goToSlide(4)">5 · Viaje</button>
+    <button class="slide-tab" onclick="goToSlide(5)">6 · Accionables</button>
+  </div>
+  <div class="slide-arrows">
+    <span class="slide-counter" id="slideCounter">1 / 6</span>
+    <button class="slide-btn" id="btnPrev" onclick="changeSlide(-1)" disabled>←</button>
+    <button class="slide-btn" id="btnNext" onclick="changeSlide(1)">→</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Deep Dive · Plataforma Fitness</div>
+    <h1>Diagnóstico completo<br>de <em>churn</em></h1>
+    <p>Análisis exhaustivo de por qué las usuarias se van, cuándo se van, y qué hace una usuaria típica antes de churnearse.</p>
+    <div class="hero-meta">
+      <span>📊 Fuente: Uscreen Advanced Analytics</span>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 1: RESUMEN EJECUTIVO ─── -->
+  <div class="slide active" id="slide-0">
+  <section>
+    <div class="section-label">Resumen Ejecutivo</div>
+    <h2>El churn tiene <em>dos caras</em></h2>
+    <p class="section-sub">La pérdida de revenue ocurre en dos momentos distintos: antes de pagar (leads que nunca convierten) y después de pagar (suscriptoras que se van). Ambos necesitan soluciones diferentes.</p>
+
+    <div class="kpi-grid">
+      <div class="kpi red">
+        <div class="kpi-label">Leads históricos sin convertir</div>
+        <div class="kpi-number">10.397</div>
+        <div class="kpi-sub">Desde el inicio de la app — nunca pagaron</div>
+      </div>
+      <div class="kpi red">
+        <div class="kpi-label">Suscriptoras históricas churneadas</div>
+        <div class="kpi-number">9.750</div>
+        <div class="kpi-sub">Desde el inicio de la app — el 80% del total que pagó</div>
+      </div>
+      <div class="kpi orange">
+        <div class="kpi-label">Revenue perdido</div>
+        <div class="kpi-number">$276K</div>
+        <div class="kpi-sub">Lifetime spend acumulado de churners</div>
+      </div>
+      <div class="kpi orange">
+        <div class="kpi-label">Churn rate mensual prom. 2025</div>
+        <div class="kpi-number">13.8%</div>
+        <div class="kpi-sub">Por mes sobre base activa — plan Mensual: 19.5%/mes estructural</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-label">Revenue 2025 (USD)</div>
+        <div class="kpi-number">510K</div>
+        <div class="kpi-sub">MP + Uscreen unificado, TC oficial</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-label">MRR norm. prom. 2025</div>
+        <div class="kpi-number">~29.7K</div>
+        <div class="kpi-sub">USD/mes (equivalente mensual recurrente)</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Contexto revenue — evolución mensual (USD unificado)</h3>
+      <p class="section-sub" style="margin-bottom:12px">MP convertido a USD con tipo de cambio oficial; Uscreen en USD. MRR normalizado = equivalente mensual por plan (anual/12, trimestral/3, mensual/1). Feb 2026: solo Uscreen (MP aún no cerrado).</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>Revenue total (USD)</th>
+              <th>MRR norm. (USD)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>2025-01</td><td>50.457</td><td>23.782</td></tr>
+            <tr><td>2025-02</td><td>31.120</td><td>24.207</td></tr>
+            <tr><td>2025-03</td><td>35.870</td><td>27.151</td></tr>
+            <tr><td>2025-04</td><td>37.197</td><td>30.689</td></tr>
+            <tr><td>2025-05</td><td class="td-highlight">57.632</td><td class="td-highlight">40.369</td></tr>
+            <tr><td>2025-06</td><td>39.219</td><td>30.405</td></tr>
+            <tr><td>2025-07</td><td>34.128</td><td>27.057</td></tr>
+            <tr><td>2025-08</td><td>43.833</td><td>30.677</td></tr>
+            <tr><td>2025-09</td><td>40.582</td><td>30.015</td></tr>
+            <tr><td>2025-10</td><td>38.933</td><td>30.173</td></tr>
+            <tr><td>2025-11</td><td>37.142</td><td>29.749</td></tr>
+            <tr><td>2025-12</td><td class="td-highlight">64.302</td><td class="td-highlight">31.708</td></tr>
+            <tr><td>2026-01</td><td>40.995</td><td>26.863</td></tr>
+            <tr><td>2026-02</td><td class="td-orange">15.549 *</td><td class="td-orange">11.542 *</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:11px;color:#888;margin-top:8px">* Solo Uscreen (datos MP de feb 2026 aún no cerrados).</p>
+    </div>
+
+    <div class="alert red">
+      <div class="alert-icon">🚨</div>
+      <div class="alert-content">
+        <strong>Las dos señales más urgentes del análisis</strong>
+        (1) En enero–febrero 2026, por primera vez en la historia de la app, la base activa cayó en neto: -127 suscriptoras en dos meses. (2) El plan Mensual tiene un churn estructural de 19–21% por mes desde 2022: cada mes se pierde 1 de cada 5 mensualeras. El problema no es que el churn se aceleró — es que siempre fue alto en Mensual y la base ya no crece lo suficiente para compensarlo.
+      </div>
+    </div>
+  </section>
+  </div><!-- /slide-0 -->
+
+  <!-- ─── SLIDE 2: LEADS ─── -->
+  <div class="slide" id="slide-1">
+  <section>
+    <div class="section-label">Nivel 1 · Leads</div>
+    <h2>10.397 personas que llegaron<br>y <em>nunca pagaron</em></h2>
+    <p class="section-sub">Son el eslabón más grande de la cadena de pérdida. Se registraron en la plataforma pero su Lifetime Spend es $0 y su estado de suscripción es "Never".</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>¿De dónde vienen?</h3>
+        <div class="bar-list">
+          <div class="bar-row">
+            <div class="bar-label">App Sign Up</div>
+            <div class="bar-track"><div class="bar-fill" style="width:45.7%"></div></div>
+            <div class="bar-value">4.756 (45.7%)</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Web Sign Up</div>
+            <div class="bar-track"><div class="bar-fill" style="width:37.9%"></div></div>
+            <div class="bar-value">3.936 (37.9%)</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Uscreen (Publisher API)</div>
+            <div class="bar-track"><div class="bar-fill orange" style="width:14.7%"></div></div>
+            <div class="bar-value">1.531 (14.7%)</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Desconocido</div>
+            <div class="bar-track"><div class="bar-fill" style="width:1.5%;background:#bbb"></div></div>
+            <div class="bar-value">160 (1.5%)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Canal de adquisición (referrer)</h3>
+        <div class="bar-list">
+          <div class="bar-row">
+            <div class="bar-label">Sin referrer trackeado</div>
+            <div class="bar-track"><div class="bar-fill red" style="width:69.3%"></div></div>
+            <div class="bar-value">7.203 (69.3%)</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Instagram</div>
+            <div class="bar-track"><div class="bar-fill" style="width:26.3%"></div></div>
+            <div class="bar-value">2.735 (26.3%)</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Google</div>
+            <div class="bar-track"><div class="bar-fill" style="width:1.8%"></div></div>
+            <div class="bar-value">190 (1.8%)</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Linktree</div>
+            <div class="bar-track"><div class="bar-fill" style="width:1.4%"></div></div>
+            <div class="bar-value">141 (1.4%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert orange">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-content">
+        <strong>Problema de atribución grave</strong>
+        El 69.3% de los leads no tiene referrer trackeado y solo el ~10% tiene datos UTM. Esto significa que el 85–90% de las campañas que generan leads están corriendo sin poder medir su impacto real. No se puede optimizar lo que no se mide.
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <h3>Segmentos clave dentro de los leads</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Segmento</th>
+              <th>Cantidad</th>
+              <th>Características</th>
+              <th>Oportunidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Abandoned Checkout</td>
+              <td class="td-highlight">375</td>
+              <td>Llegaron al pago, no completaron</td>
+              <td class="td-green">Máxima prioridad de re-engagement</td>
+            </tr>
+            <tr>
+              <td>Email opt-in activo</td>
+              <td class="td-highlight">7.806 (75.1%)</td>
+              <td>Aceptaron recibir emails</td>
+              <td class="td-green">Lista disponible para nurturing</td>
+            </tr>
+            <tr>
+              <td>Sin email opt-in</td>
+              <td>2.591 (24.9%)</td>
+              <td>No aceptaron emails</td>
+              <td>Solo retargeting paid</td>
+            </tr>
+            <tr>
+              <td>Uscreen (Publisher API)</td>
+              <td class="td-orange">1.531</td>
+              <td>Sin tracking, origen desconocido</td>
+              <td>Investigar fuente</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="highlight-quote">
+      375 personas llegaron hasta el checkout y no pagaron. Son el segmento de <em>mayor intención de compra</em> de toda la base de leads — y hoy no reciben ninguna comunicación específica.
+    </div>
+
+    <div class="card">
+      <h3>Geografía (muestra con datos disponibles)</h3>
+      <div class="bar-list">
+        <div class="bar-row"><div class="bar-label">Argentina</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="bar-value">Principal</div></div>
+        <div class="bar-row"><div class="bar-label">Uruguay</div><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><div class="bar-value">Secundario</div></div>
+        <div class="bar-row"><div class="bar-label">Chile</div><div class="bar-track"><div class="bar-fill" style="width:30%"></div></div><div class="bar-value">Terciario</div></div>
+        <div class="bar-row"><div class="bar-label">España</div><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><div class="bar-value">Relevante</div></div>
+        <div class="bar-row"><div class="bar-label">Colombia · México · Ecuador</div><div class="bar-track"><div class="bar-fill" style="width:15%;background:#bbb"></div></div><div class="bar-value">Presente</div></div>
+      </div>
+    </div>
+
+    <div class="alert pink" style="margin-top:10px">
+      <div class="alert-icon">🇲🇽</div>
+      <div class="alert-content">
+        <strong>Oportunidad inmediata: viaje a México en 1 semana</strong>
+        México es el mercado hispanohablante de mayor escala fuera del Río de la Plata — y ya hay usuarias activas. El viaje es una ventana para activar el mercado. Tres sugerencias concretas:
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px">
+      <div style="border:1px solid rgba(243,86,149,0.3);border-radius:10px;padding:20px;background:rgba(243,86,149,0.04)">
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--pink);margin-bottom:8px">🔍 Sugerencia 1 — Investigación de mercado</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:6px">Entrevistas e insight en terreno</div>
+        <div style="font-size:13px;color:#666;line-height:1.6">Charlas informales con mujeres que entrenan: qué apps usan, qué pagan, qué les frena a suscribirse. Visitar gyms o estudios y relevar oferta local, precios, lenguaje. Insight para decisiones de producto, pricing y mensaje en México.</div>
+      </div>
+      <div style="border:1px solid rgba(243,86,149,0.3);border-radius:10px;padding:20px;background:rgba(243,86,149,0.04)">
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--pink);margin-bottom:8px">🎥 Sugerencia 2 — Material grabado para edición</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:6px">B-roll, testimonios y behind the scenes</div>
+        <div style="font-size:13px;color:#666;line-height:1.6">Grabar en destino: paisajes, ubicaciones, testimonios de usuarias (si se puede coordinar), detrás de escena. El material se entrega a las film makers para editar; luego se sube a la plataforma o IG. Genera materia prima sin necesidad de producir la clase en vivo allí.</div>
+      </div>
+      <div style="border:1px solid rgba(243,86,149,0.3);border-radius:10px;padding:20px;background:rgba(243,86,149,0.04)">
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--pink);margin-bottom:8px">🤝 Sugerencia 3 — Colaboración local</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:6px">Contacto y grabación para un futuro reel</div>
+        <div style="font-size:13px;color:#666;line-height:1.6">Identificar una creadora de fitness/wellness mexicana con audiencia femenina y afinidad de valores. Reunión en persona; grabar lo necesario (entrevista, tomas juntas) para que el equipo arme después un reel de colaboración. El puente y la grabación en destino; edición y publicación del lado de Inner.</div>
+      </div>
+    </div>
+  </section>
+  </div><!-- /slide-1 -->
+
+  <!-- ─── SLIDE 3: SUSCRIPTORAS ─── -->
+  <div class="slide" id="slide-2">
+  <section>
+    <div class="section-label">Nivel 2 · Suscriptoras Churneadas</div>
+    <h2>9.750 que pagaron<br>y <em>se fueron</em></h2>
+    <p class="section-sub">Este segmento sí tuvo intención real de pago. Entender cuándo y por qué se van es la clave para la retención.</p>
+
+    <div class="card">
+      <h3>Churn rate mensual promedio por año y plan <span style="font-size:12px;color:#666;font-weight:400">(churned / base activa inicio de mes)</span></h3>
+      <div class="table-wrap" style="margin-top:8px">
+        <table>
+          <thead>
+            <tr><th>Año</th><th>Total</th><th>Mensual</th><th>Trimestral</th><th>Anual</th><th>Nota</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2022</td><td>13.0%</td><td class="td-orange">17.3%</td><td>11.4%</td><td class="td-green">3.9%</td><td style="color:#555;font-size:12px">Línea base</td>
+            </tr>
+            <tr>
+              <td>2023</td><td>14.1%</td><td class="td-red">21.2%</td><td class="td-red">14.7%</td><td class="td-green">2.3%</td><td style="color:#f4821f;font-size:12px">⚠ Trimestral colapsa (202 → 69)</td>
+            </tr>
+            <tr>
+              <td>2024</td><td>13.3%</td><td class="td-orange">19.8%</td><td class="td-green">3.7%</td><td>4.7%</td><td style="color:#2a9d5c;font-size:12px">Trimestral se recupera</td>
+            </tr>
+            <tr>
+              <td>2025</td><td>13.8%</td><td class="td-orange">19.5%</td><td>8.8%</td><td class="td-green">3.7%</td><td style="color:#f4821f;font-size:12px">Sep pico 18.4% total</td>
+            </tr>
+            <tr style="background:rgba(230,57,70,0.06)">
+              <td><strong style="color:#e63946">2026*</strong></td><td class="td-red">16.1%</td><td class="td-orange">18.4%</td><td>10.2%</td><td class="td-red">13.5%</td><td class="td-red" style="font-size:12px">🚨 Base neta cayendo</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:#555;margin-top:10px">* 2026 = enero–febrero únicamente. Churns totales históricos: 2022: 1.263 | 2023: 1.971 | 2024: 2.213 | 2025: 4.068</p>
+      <p style="font-size:12px;color:#666;margin-top:6px"><strong>Impacto en revenue:</strong> con un MRR normalizado de ~30K USD/mes (ver Resumen), cada punto de churn que se reduce o cada suscriptora que se retiene preserva ingreso recurrente. El plan Mensual (19–21% churn/mes) es el que más tensiona el MRR.</p>
+    </div>
+
+    <div class="alert red" style="margin-top:4px">
+      <div class="alert-icon">🚨</div>
+      <div class="alert-content">
+        <strong>2026: primera vez que la base activa pierde suscriptoras — neto negativo</strong>
+        Enero 2026: 539 churns vs 453 ingresos (nuevas + reactivadas) = <strong>-86 neto</strong>. Febrero 2026: 346 churns vs 305 ingresos = <strong>-41 neto</strong>. En solo dos meses, la base activa cayó 127 suscriptoras. Desde 2022, la base total siempre creció — esta es la primera ruptura de esa tendencia.
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:10px">
+      <div class="card">
+        <h3>¿Cuándo se van? <span class="badge badge-red">Mensual — 5.400 churners</span></h3>
+        <div class="bar-list">
+          <div class="bar-row">
+            <div class="bar-label">Mes 0 (días 0–30)</div>
+            <div class="bar-track"><div class="bar-fill red" style="width:12%"></div></div>
+            <div class="bar-value" style="color:#e63946">12% · 638</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Mes 1 (días 30–60)</div>
+            <div class="bar-track"><div class="bar-fill red" style="width:33%"></div></div>
+            <div class="bar-value" style="color:#e63946">33% · 1.779</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Mes 2 (días 60–90)</div>
+            <div class="bar-track"><div class="bar-fill orange" style="width:18%"></div></div>
+            <div class="bar-value">18% · 980</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Meses 3–6 (90–180d)</div>
+            <div class="bar-track"><div class="bar-fill" style="width:22%;background:#aaa"></div></div>
+            <div class="bar-value">22% · 1.179</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Meses 6–12 (180–365d)</div>
+            <div class="bar-track"><div class="bar-fill" style="width:11%;background:#bbb"></div></div>
+            <div class="bar-value">11% · 577</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Mes 12+ (365d+)</div>
+            <div class="bar-track"><div class="bar-fill" style="width:5%;background:#ccc"></div></div>
+            <div class="bar-value">5% · 247</div>
+          </div>
+        </div>
+        <p style="font-size:12px;color:#666;margin-top:10px;border-top:1px solid #e5e5e5;padding-top:10px">
+          <strong style="color:#e63946">45%</strong> de las mensualeras churneadas se van en los primeros 60 días (mes 0+1). El problema central es de activación, no de retención tardía. Mediana de tenure al churn: 62 días.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Churn rate mensual por plan <span style="font-size:12px;color:#666;font-weight:400">(promedio 2025)</span></h3>
+        <div class="bar-list">
+          <div class="bar-row">
+            <div class="bar-label">Mensual</div>
+            <div class="bar-track"><div class="bar-fill red" style="width:97.5%"></div></div>
+            <div class="bar-value" style="color:#e63946">19.5%/mes</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Trimestral</div>
+            <div class="bar-track"><div class="bar-fill orange" style="width:44%"></div></div>
+            <div class="bar-value">8.8%/mes</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Anual</div>
+            <div class="bar-track"><div class="bar-fill green" style="width:18.5%"></div></div>
+            <div class="bar-value" style="color:#2a9d5c">3.7%/mes</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px">
+          <div style="border:1px solid rgba(230,57,70,0.35);border-radius:10px;padding:16px;background:rgba(230,57,70,0.03)">
+            <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#e63946;margin-bottom:6px">🔴 Mensual</div>
+            <div style="font-size:22px;font-weight:900;color:#e63946;letter-spacing:-1px">19–21%<span style="font-size:12px;font-weight:600">/mes</span></div>
+            <div style="font-size:11px;color:#888;margin:4px 0 8px">Base: 1.552 · Renueva cada 30d</div>
+            <div style="font-size:12px;color:#e63946;font-weight:600">⚠ Estructural — sin mejora desde 2022</div>
+          </div>
+          <div style="border:1px solid rgba(42,157,92,0.35);border-radius:10px;padding:16px;background:rgba(42,157,92,0.03)">
+            <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#2a9d5c;margin-bottom:6px">🟡 Trimestral</div>
+            <div style="font-size:22px;font-weight:900;color:#2a9d5c;letter-spacing:-1px">8–9%<span style="font-size:12px;font-weight:600">/mes</span></div>
+            <div style="font-size:11px;color:#888;margin:4px 0 8px">Base: 407 · Renueva cada 90d</div>
+            <div style="font-size:12px;color:#2a9d5c;font-weight:600">↑ En crecimiento sostenido</div>
+          </div>
+          <div style="border:1px solid rgba(244,130,31,0.35);border-radius:10px;padding:16px;background:rgba(244,130,31,0.03)">
+            <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#f4821f;margin-bottom:6px">🟢 Anual</div>
+            <div style="font-size:22px;font-weight:900;color:#2a9d5c;letter-spacing:-1px">3–5%<span style="font-size:12px;font-weight:600">/mes</span></div>
+            <div style="font-size:11px;color:#888;margin:4px 0 8px">Base: 830 · Renueva cada 365d</div>
+            <div style="font-size:12px;color:#e63946;font-weight:600">🚨 13.5% ene 2026 — máximo histórico</div>
+          </div>
+        </div>
+        <p style="font-size:12px;color:#666;margin-top:10px;border-top:1px solid #e5e5e5;padding-top:10px">
+          El mensual genera el 85% del churn histórico. La anual es el plan más estable, pero en enero 2026 tuvo su peor mes: 13.5% vs 3–5% histórico — explicado por el vencimiento masivo de anuales contratadas en enero 2025 (el mejor mes de captación de ese año: +358 nuevas).
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <h3>Tres patrones distintos de churn — diagnóstico por plan <span class="badge badge-pink">Análisis full dataset</span></h3>
+      <p style="font-size:13px;color:#888;margin-bottom:16px">Basado en 869.000 registros de actividad cruzados con fechas de suscripción. Cada plan tiene una lógica de abandono diferente que requiere una intervención distinta.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+
+        <div style="border:1px solid rgba(230,57,70,0.3);border-radius:12px;padding:20px;background:rgba(230,57,70,0.04)">
+          <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#e63946;margin-bottom:8px">🔴 Mensual — Falla de activación</div>
+          <div style="font-size:20px;font-weight:900;color:#e63946;letter-spacing:-1px;margin-bottom:4px">5.400 churners</div>
+          <div style="font-size:11px;color:#555;margin-bottom:14px">85% del churn histórico</div>
+          <ul style="list-style:none;padding:0;font-size:13px;color:#555;line-height:2">
+            <li>→ 45% se van en los primeros 60 días</li>
+            <li>→ 37% de early churners: menos de 10 videos totales</li>
+            <li>→ Empiezan bien (Día 1, Nutrición) pero no continúan</li>
+            <li>→ 16 días: mediana última vista → churn (early)</li>
+            <li>→ 32% estaba activa en los 7 días previos al churn</li>
+          </ul>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid #e5e5e5;font-size:12px;color:#666;line-height:1.6">
+            <strong style="color:#444">Diagnóstico:</strong> Problema de activación. El onboarding no logra que la usuaria construya un hábito en los primeros 7 días.
+          </div>
+        </div>
+
+        <div style="border:1px solid rgba(244,130,31,0.3);border-radius:12px;padding:20px;background:rgba(244,130,31,0.04)">
+          <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#f4821f;margin-bottom:8px">🟠 Trimestral — Suscriptora fantasma</div>
+          <div style="font-size:20px;font-weight:900;color:#f4821f;letter-spacing:-1px;margin-bottom:4px">522 churners</div>
+          <div style="font-size:11px;color:#555;margin-bottom:14px">Mediana de tenure: 159 días (~2 trimestres)</div>
+          <ul style="list-style:none;padding:0;font-size:13px;color:#555;line-height:2">
+            <li>→ 28% no abre la plataforma en los primeros 7 días</li>
+            <li>→ De ese 28%: primera vista en el día 151 (mediana)</li>
+            <li>→ Pagan trimestre 1 sin usarlo, arrancan en el 2</li>
+            <li>→ Churn en renovación del trimestre 2 o 3</li>
+            <li>→ Las que enganchan en semana 1: 40% llega a 50+ videos</li>
+          </ul>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid #e5e5e5;font-size:12px;color:#666;line-height:1.6">
+            <strong style="color:#444">Diagnóstico:</strong> Onboarding de trimestral inexistente. Pagan 3 meses y no son "despertadas" en la primera semana.
+          </div>
+        </div>
+
+        <div style="border:1px solid rgba(42,157,92,0.3);border-radius:12px;padding:20px;background:rgba(42,157,92,0.04)">
+          <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#2a9d5c;margin-bottom:8px">🟢 Anual — Desenganche gradual</div>
+          <div style="font-size:20px;font-weight:900;color:#2a9d5c;letter-spacing:-1px;margin-bottom:4px">519 churners</div>
+          <div style="font-size:11px;color:#555;margin-bottom:14px">Mediana de tenure: 369 días (al vencimiento)</div>
+          <ul style="list-style:none;padding:0;font-size:13px;color:#555;line-height:2">
+            <li>→ Uso por trimestre: 27 → 11 → 5 → 3 videos</li>
+            <li>→ 39% no usa la plataforma en el último trimestre</li>
+            <li>→ Engancharon bien en Q1 — el problema es Q3</li>
+            <li>→ 64 días: mediana última vista → churn</li>
+            <li>→ La decisión de no renovar se toma en Q3, no en enero</li>
+          </ul>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid #e5e5e5;font-size:12px;color:#666;line-height:1.6">
+            <strong style="color:#444">Diagnóstico:</strong> Problema de valor percibido a largo plazo. La intervención necesaria es en Q3 (mes 6–9), meses antes del vencimiento.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <h3>LTV y revenue por plan</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Plan</th><th>Churners</th><th>% con pago real</th><th>LTV promedio</th><th>Churn en mes 0-1</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Mensual</td>
+              <td>7.975</td>
+              <td>39.3%</td>
+              <td class="td-orange">$24.74</td>
+              <td class="td-red">24.2%</td>
+            </tr>
+            <tr>
+              <td>Trimestral</td>
+              <td>950</td>
+              <td>50.8%</td>
+              <td>$45.10</td>
+              <td>12.1%</td>
+            </tr>
+            <tr>
+              <td>Anual</td>
+              <td>728</td>
+              <td>35.6%</td>
+              <td>$48.17</td>
+              <td class="td-green">8.1%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="alert orange" style="margin-top:10px">
+        <div class="alert-icon">💡</div>
+        <div class="alert-content">
+          <strong>El 60.1% de los "Former" nunca pagó nada ($0 LTV)</strong>
+          Son 5.862 usuarias con status Former y Lifetime Spend = $0. Pueden ser trials que no convirtieron, pagos fallidos, o accesos promocionales. Entender este grupo es clave para separar el churn real del trial-no-convertido.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <h3>Evolución de la base activa por plan — últimos 14 meses <span class="badge badge-pink">Clasificación por suscripción</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Mes</th><th>Total</th><th>Mensual</th><th>Trimestral</th><th>Anual</th><th>Neto mes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Ene 2025</td><td>1.813</td><td>1.063</td><td>148</td><td>602</td><td class="td-green">+194</td></tr>
+            <tr><td>Feb 2025</td><td>2.007</td><td>1.170</td><td>177</td><td>660</td><td class="td-green">+257</td></tr>
+            <tr><td>Mar 2025</td><td>2.264</td><td>1.359</td><td>222</td><td>683</td><td class="td-green">+179</td></tr>
+            <tr><td>Abr 2025</td><td>2.443</td><td>1.482</td><td>257</td><td>704</td><td class="td-green">+45</td></tr>
+            <tr><td>May 2025</td><td>2.488</td><td>1.512</td><td>263</td><td>713</td><td class="td-green">+5</td></tr>
+            <tr><td>Jun 2025</td><td>2.493</td><td>1.496</td><td>260</td><td>737</td><td class="td-green">+41</td></tr>
+            <tr><td>Jul 2025</td><td>2.534</td><td>1.528</td><td>269</td><td>737</td><td class="td-orange">-8</td></tr>
+            <tr><td>Ago 2025</td><td>2.526</td><td>1.523</td><td>274</td><td>729</td><td class="td-green">+246</td></tr>
+            <tr style="background:rgba(244,130,31,0.05)"><td style="color:#f4821f">Sep 2025 ⚠</td><td style="color:#f4821f">2.772</td><td>1.687</td><td>294</td><td>791</td><td class="td-red">-94</td></tr>
+            <tr><td>Oct 2025</td><td>2.678</td><td>1.590</td><td>327</td><td>761</td><td class="td-green">+20</td></tr>
+            <tr><td>Nov 2025</td><td>2.698</td><td>1.595</td><td>355</td><td>748</td><td class="td-green">+31</td></tr>
+            <tr><td>Dic 2025</td><td>2.729</td><td>1.604</td><td>378</td><td>747</td><td class="td-green">+60</td></tr>
+            <tr style="background:rgba(230,57,70,0.06)"><td><strong style="color:#e63946">Ene 2026 🚨</strong></td><td class="td-red">2.789</td><td>1.552</td><td>407</td><td>830</td><td class="td-red">-86</td></tr>
+            <tr style="background:rgba(230,57,70,0.04)"><td><strong style="color:#e63946">Feb 2026</strong></td><td class="td-red">2.703</td><td>1.594</td><td>452</td><td class="td-red">657</td><td class="td-red">-41</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:#555;margin-top:10px">Base activa = suscriptoras al inicio de cada mes. Neto = nuevas + reactivadas − churns. El Anual cayó de 830 a 657 en un mes (feb 2026) por vencimiento masivo de renovaciones. El Trimestral creció de 69 (ene 2024) a 452 (feb 2026) — el plan de mayor crecimiento relativo.</p>
+    </div>
+  </section>
+  </div><!-- /slide-2 -->
+
+  <!-- ─── SLIDE 4: CONTENIDO ─── -->
+  <div class="slide" id="slide-3">
+  <section>
+    <div class="section-label">Nivel 3 · Comportamiento de Contenido</div>
+    <h2>Qué hace una usuaria<br><em>antes de irse</em></h2>
+    <p class="section-sub">El cruce entre datos de visualización y churn revela patrones de comportamiento muy claros que predicen la cancelación.</p>
+
+    <div class="kpi-grid">
+      <div class="kpi red">
+        <div class="kpi-label">Videos (mediana mensual early churner)</div>
+        <div class="kpi-number">12</div>
+        <div class="kpi-sub">37% tiene menos de 10 videos en total</div>
+      </div>
+      <div class="kpi red">
+        <div class="kpi-label">Watch time (mediana mensual early)</div>
+        <div class="kpi-number">55 min</div>
+        <div class="kpi-sub">Total acumulado — menos de 1 hora de uso</div>
+      </div>
+      <div class="kpi orange">
+        <div class="kpi-label">Trimestral sin actividad semana 1</div>
+        <div class="kpi-number">28%</div>
+        <div class="kpi-sub">Primera vista mediana: día 151 del trimestre</div>
+      </div>
+      <div class="kpi pink">
+        <div class="kpi-label">Ventana de intervención (mensual early)</div>
+        <div class="kpi-number">16 días</div>
+        <div class="kpi-sub">Mediana última vista → churn — Anual: 64 días</div>
+      </div>
+    </div>
+
+    <div class="alert pink" style="margin-top:8px">
+      <div class="alert-icon">🎯</div>
+      <div class="alert-content">
+        <strong>El umbral de activación confirmado con datos reales</strong>
+        37% de las mensual early churners tiene menos de 10 videos totales en toda su vida como suscriptora. 60% tiene menos de 20. El umbral de 10 videos / 2 horas en el primer mes sigue siendo el indicador clave: quien lo supera tiene perfil de usuaria activa. Activar a las nuevas hasta ese punto debe ser el objetivo número uno del onboarding.
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:12px">
+      <div class="card">
+        <h3>Contenido con mejor completion rate <span class="badge badge-green">Palanca de retención</span></h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Video</th><th>Completion</th><th>Viewers</th></tr></thead>
+            <tbody>
+              <tr><td>Guía ordenar comidas — Nutrición</td><td class="td-green">93%</td><td>1.471</td></tr>
+              <tr><td>Guía pérdida de grasa — Nutrición</td><td class="td-green">92%</td><td>2.188</td></tr>
+              <tr><td>Guía ganancia muscular — Nutrición</td><td class="td-green">90%</td><td>1.107</td></tr>
+              <tr><td>Abs finisher 7' — Snacks</td><td class="td-green">71%</td><td>1.776</td></tr>
+              <tr><td>Bienvenida a Inner</td><td class="td-green">71%</td><td>1.452</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:12px;color:#555;margin-top:12px">El contenido de Nutrición supera en completion a cualquier clase de ejercicio. No está en el onboarding — debería estar.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px; border-left:4px solid var(--pink)">
+      <h3>Deep dive: Inner Method — cómo tracciona y qué esperar del 2 <span class="badge badge-pink">Programa insignia</span></h3>
+      <p style="font-size:13px;color:#888;margin-bottom:16px">Análisis detallado del programa principal por views, viewers, completion y agendados al calendario. Referencia para el recién lanzado Inner Method 2.</p>
+
+      <h4 style="font-size:14px;font-weight:700;color:#333;margin:16px 0 8px">Tracción MES 1 — punto de entrada</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Video (MES 1)</th><th>Viewers</th><th>Views</th><th>Completion</th><th>Agendados</th></tr></thead>
+          <tbody>
+            <tr><td>Día 1: QUADS &amp; GLÚTEOS HOME</td><td class="td-highlight">2.964</td><td>8.014</td><td>43%</td><td class="td-green">2.223</td></tr>
+            <tr><td>Día 1: QUADS &amp; GLÚTEOS GYM</td><td>2.582</td><td>7.056</td><td class="td-green">57%</td><td>2.096</td></tr>
+            <tr><td>Día 2: TREN SUPERIOR GYM</td><td>1.741</td><td>5.118</td><td class="td-green">59%</td><td>2.039</td></tr>
+            <tr><td>Día 2: TREN SUPERIOR HOME</td><td>1.795</td><td>4.596</td><td>57%</td><td>2.072</td></tr>
+            <tr><td>Día 3: GLÚTEOS E ISQUIOS GYM</td><td>1.420</td><td>3.814</td><td>54%</td><td>1.823</td></tr>
+            <tr><td>Día 3: GLÚTEOS E ISQUIOS HOME</td><td>1.535</td><td>3.551</td><td>55%</td><td>1.831</td></tr>
+            <tr><td>Día 4: CUERPO COMPLETO GYM</td><td>1.294</td><td>2.927</td><td>57%</td><td>1.333</td></tr>
+            <tr><td>Día 4: CUERPO COMPLETO HOME</td><td>1.359</td><td>2.885</td><td>54%</td><td>1.481</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:#555;margin-top:10px">Funnel claro: ~2.600–2.900 viewers en Día 1 bajan a ~1.300–1.500 en Día 4. La caída Día 1 → Día 2 es la más fuerte (−26% en viewers). Bienvenida al Inner Method: 2.177 viewers y <strong>72% completion</strong> — buen anclaje de programa.</p>
+
+      <h4 style="font-size:14px;font-weight:700;color:#333;margin:20px 0 8px">MES 2 — mayor completion, menor volumen</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Video (MES 2)</th><th>Viewers</th><th>Completion</th><th>Agendados</th></tr></thead>
+          <tbody>
+            <tr><td>Día 1: QUADS &amp; GLÚTEOS HOME</td><td>1.098</td><td class="td-green">62%</td><td>942</td></tr>
+            <tr><td>Día 2: TREN SUPERIOR HOME</td><td>998</td><td class="td-green">66%</td><td>962</td></tr>
+            <tr><td>Día 2: TREN SUPERIOR GYM</td><td>981</td><td>55%</td><td>917</td></tr>
+            <tr><td>Día 1: QUADS &amp; GLÚTEOS GYM</td><td>1.096</td><td>53%</td><td>1.012</td></tr>
+            <tr><td>Día 3: GLÚTEOS E ISQUIOS HOME</td><td>870</td><td class="td-green">62%</td><td>814</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:#555;margin-top:10px">Quienes llegan a MES 2 son menos en número pero completan más (62–66% vs 53–57% en MES 1). El contenido del 2 retiene mejor a quien ya progresó.</p>
+
+      <div class="alert pink" style="margin-top:10px">
+        <div class="alert-icon">📌</div>
+        <div class="alert-content">
+          <strong>Para Inner Method 2</strong> — (1) El cuello de botella sigue siendo Día 1 → Día 2: reforzar onboarding y recordatorios en esa transición. (2) Home tiene más views y watch time; Gym tiene videos más cortos y completion más alta. (3) Las usuarias que pasan a MES 2 tienen mejor engagement; el 2 puede usarse como palanca de retención para quienes completan el primer mes.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <h3>Qué ven en la primera semana — Mensual early churners <span class="badge badge-orange">2.417 usuarias analizadas</span></h3>
+      <p style="font-size:13px;color:#888;margin-bottom:16px">Top videos más vistos en los primeros 7 días por mensualeras que churnearon antes de los 60 días. Muestran el patrón de inicio — y dónde se quiebra:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Video (semana 1)</th><th>Usuarias</th><th>Señal</th></tr></thead>
+          <tbody>
+            <tr><td>Día 1: GLÚTEOS, ISQUIOS, ESPALDA — TONE Gym</td><td class="td-highlight">519</td><td class="td-orange">¿Continúan al Día 2?</td></tr>
+            <tr><td>Día 1: QUADS &amp; GLÚTEOS GYM — Inner Method</td><td class="td-highlight">459</td><td class="td-orange">¿Continúan al Día 2?</td></tr>
+            <tr><td>Día 1: QUADS &amp; GLÚTEOS HOME — Inner Method</td><td>448</td><td class="td-orange">¿Continúan al Día 2?</td></tr>
+            <tr><td>Elegí tu programa ideal</td><td>393</td><td class="td-green">Buena señal — se orientan</td></tr>
+            <tr><td>Día 2: TREN SUPERIOR GYM — Inner Method</td><td class="td-red">340</td><td class="td-red">Solo 340 llegan al Día 2 vs 459 en Día 1 (−26%)</td></tr>
+            <tr><td>¡Bienvenida Torita!</td><td>339</td><td class="td-green">Ven el onboarding</td></tr>
+            <tr><td>Guía para pérdida de grasa — Nutrición</td><td class="td-green">331</td><td class="td-green">Alta retención — no está en onboarding</td></tr>
+            <tr><td>Bienvenida al Inner Method</td><td>337</td><td class="td-green">Buena señal</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="alert orange" style="margin-top:12px">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <strong>La caída del Día 1 al Día 2 es la fractura más visible</strong>
+          459 usuarias hicieron el Día 1 de Inner Method Gym — solo 340 llegaron al Día 2 (−26% en 24 horas). Estas son early churners que ya pagaron pero no continuaron el programa. La Guía de Nutrición aparece orgánicamente en semana 1 (331 vistas) con altísima completion — pero no está en el onboarding estructurado. Incluirla en los primeros 3 días podría ser el "gancho" que falta.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <h3>La trampa del Día 1 — abandono progresivo de programa</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:16px">Los videos más agendados al calendario son los inicios de programa, pero hay caída progresiva entre días:</p>
+      <div class="bar-list">
+        <div class="bar-row">
+          <div class="bar-label">Día 1 — Inner Method</div>
+          <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+          <div class="bar-value">2.223 agendados</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Día 2</div>
+          <div class="bar-track"><div class="bar-fill" style="width:93%"></div></div>
+          <div class="bar-value">2.072 agendados</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Día 3</div>
+          <div class="bar-track"><div class="bar-fill orange" style="width:82%"></div></div>
+          <div class="bar-value">1.831 agendados</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Día 4</div>
+          <div class="bar-track"><div class="bar-fill red" style="width:67%"></div></div>
+          <div class="bar-value">1.481 agendados</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#666;margin-top:16px">Caída del 33% de Día 1 a Día 4. Muchas churners probablemente solo vieron el primer día y no continuaron el programa.</p>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <h3>Videos populares con bajo completion <span class="badge badge-orange">Problema de formato</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Video</th><th>Views</th><th>Completion</th><th>Duración</th></tr></thead>
+          <tbody>
+            <tr><td>VIVO Yoga Bootcamp</td><td class="td-highlight">10.654</td><td class="td-red">10%</td><td>47 min</td></tr>
+            <tr><td>Barralates</td><td class="td-highlight">6.788</td><td class="td-red">5%</td><td>40 min</td></tr>
+            <tr><td>Entrena todo tu cuerpo</td><td>4.609</td><td class="td-red">17%</td><td>37 min</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:#555;margin-top:12px">El video más visto de toda la plataforma tiene 10% de completion. Los replays de clases largas generan mucho tráfico pero poca experiencia completa.</p>
+    </div>
+  </section>
+  </div><!-- /slide-3 -->
+
+  <!-- ─── SLIDE 5: JOURNEY ─── -->
+  <div class="slide" id="slide-4">
+  <section>
+    <div class="section-label">Viaje de la Usuaria</div>
+    <h2>El recorrido típico<br>de una usuaria que <em>se va</em></h2>
+    <p class="section-sub">Reconstrucción basada en el cruce de datos de comportamiento, fechas de suscripción y fechas de churn. Segmento: mensualera early churner (1.640 usuarias).</p>
+
+    <div class="journey">
+      <div class="journey-step">
+        <div class="journey-step-inner">
+          <div class="journey-day">Día 1</div>
+          <div class="journey-title">Registro</div>
+          <div class="journey-desc">Llega por Instagram. Se registra por app (45.7%) o web. Arranca el trial de 7 días.</div>
+        </div>
+      </div>
+      <div class="journey-step">
+        <div class="journey-step-inner">
+          <div class="journey-day">Días 1–7</div>
+          <div class="journey-title">Primeros videos</div>
+          <div class="journey-desc">Ve el Día 1 de Inner Method o TONE. Quizás el video de Bienvenida. Empieza con entusiasmo.</div>
+        </div>
+      </div>
+      <div class="journey-step warning">
+        <div class="journey-step-inner">
+          <div class="journey-day">Días 7–14</div>
+          <div class="journey-title">Espaciado de visitas</div>
+          <div class="journey-desc">Las visitas se espacian. Nunca llegó a 10 videos. No agendó, no comentó, no favoritó.</div>
+        </div>
+      </div>
+      <div class="journey-step critical">
+        <div class="journey-step-inner">
+          <div class="journey-day">Días 10–16</div>
+          <div class="journey-title">Última vista</div>
+          <div class="journey-desc">55 min de watch time total. 12 videos vistos. Deja de entrar sin cancelar. 32% sigue activa en los últimos 7 días antes del churn.</div>
+        </div>
+      </div>
+      <div class="journey-step intervention">
+        <div class="journey-step-inner">
+          <div class="journey-day">Días 16–30 ← INTERVENCIÓN</div>
+          <div class="journey-title">Silencio total</div>
+          <div class="journey-desc">No abre la app. 16 días es la mediana entre última vista y churn para early mensualeras. 46% está en esta ventana 15–30 días antes de cancelar.</div>
+        </div>
+      </div>
+      <div class="journey-step critical">
+        <div class="journey-step-inner">
+          <div class="journey-day">Día 30</div>
+          <div class="journey-title">Churn</div>
+          <div class="journey-desc">No renueva. Subscription status → Former. Revenue: $0 o un solo mes pagado.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-quote">
+      La mediana entre última vista y churn para mensualeras early es <em>16 días</em>. El 32% estaba activa en los últimos 7 días antes de cancelar. Esa ventana existe — y hoy no se está aprovechando. Para anuales, la ventana es de <em>64 días</em> — la intervención debe ser en Q3, meses antes del vencimiento.
+    </div>
+  </section>
+  </div><!-- /slide-4 -->
+
+  <!-- ─── SLIDE 6: NEXT STEPS ─── -->
+  <div class="slide" id="slide-5">
+  <section>
+    <div class="section-label">Next Steps</div>
+    <h2>Accionables concretos<br>ordenados por <em>impacto</em></h2>
+    <p class="section-sub">Tres niveles de prioridad. Las acciones de prioridad 1 tienen el mayor impacto inmediato sobre el revenue con el menor costo de implementación.</p>
+
+    <div style="margin-bottom:20px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="width:12px;height:12px;border-radius:50%;background:var(--red);display:inline-block"></span> <strong>Prioridad 1</strong> — Urgente, alto impacto, bajo costo</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="width:12px;height:12px;border-radius:50%;background:var(--orange);display:inline-block"></span> <strong>Prioridad 2</strong> — Importante, requiere proceso</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="width:12px;height:12px;border-radius:50%;background:var(--green);display:inline-block"></span> <strong>Prioridad 3</strong> — Mediano plazo, mejora estructural</div>
+      </div>
+    </div>
+
+    <div class="next-steps-grid">
+
+      <div class="action-card p1">
+        <div class="action-priority">🔴 Prioridad 1</div>
+        <h3>Email de recuperación para Abandoned Checkout</h3>
+        <p>375 personas llegaron al checkout y no pagaron. Son el segmento con mayor intención de compra de toda la base. Hoy no reciben ninguna comunicación específica.</p>
+        <div class="action-detail">
+          <strong>Qué hacer:</strong> Secuencia de 3 emails automáticos activada cuando alguien abandona el checkout. Email 1 (24hs): recordatorio simple. Email 2 (72hs): beneficios + testimonio. Email 3 (7 días): oferta de urgencia o FAQ.<br><br>
+          <strong>Dónde:</strong> Uscreen tiene trigger de Abandoned Checkout — ya etiqueta a estas usuarias.<br><br>
+          <strong>Impacto estimado:</strong> Si se recupera el 10–15% de las 375 → 37–56 nuevas suscriptoras.
+        </div>
+      </div>
+
+      <div class="action-card p1">
+        <div class="action-priority">🔴 Prioridad 1</div>
+        <h3>Trigger de reactivación a los 7 días sin actividad</h3>
+        <p>El 61.5% de las early churners para de usar la plataforma 7+ días antes de cancelar. Ese momento hoy pasa sin ninguna intervención.</p>
+        <div class="action-detail">
+          <strong>Qué hacer:</strong> Email/push automático a toda suscriptora que no abrió la app en 7 días. Mensaje: warm, no comercial. "Te extrañamos — tu próximo entrenamiento te espera." Con link directo a su programa.<br><br>
+          <strong>Dónde:</strong> Configurable en Uscreen o integrar con Klaviyo/ActiveCampaign vía webhook.<br><br>
+          <strong>Impacto:</strong> Captura la ventana de 7–11 días antes del churn.
+        </div>
+      </div>
+
+      <div class="action-card p1">
+        <div class="action-priority">🔴 Prioridad 1</div>
+        <h3>Investigar el pico de septiembre 2025 y el neto negativo de 2026</h3>
+        <p>Septiembre 2025 tuvo 18.4% de churn total — el mayor fuera de enero en todo 2025 (510 churns, -94 neto). Y en enero–febrero 2026, por primera vez, la base activa cayó en neto: -127 suscriptoras. Ambos eventos necesitan causa identificada.</p>
+        <div class="action-detail">
+          <strong>Septiembre 2025 — hipótesis a validar:</strong><br>
+          — ¿Hubo un aumento de precio en agosto–septiembre?<br>
+          — ¿Hubo una pausa en la frecuencia de contenido nuevo?<br>
+          — ¿Alguna comunicación o cambio de producto que disparó cancelaciones?<br><br>
+          <strong>Enero–febrero 2026 — causa más probable:</strong><br>
+          — Vencimiento masivo de anuales contratadas en enero 2025 (el mejor mes de captación: +358 nuevas). Plan Anual: 13.5% churn en enero 2026 vs 3–5% promedio histórico.<br><br>
+          <strong>Acción:</strong> Cruzar el timeline de cambios internos contra los picos. Diseñar encuesta de NPS exit para todas las nuevas cancelaciones desde hoy.
+        </div>
+      </div>
+
+      <div class="action-card p1">
+        <div class="action-priority">🔴 Prioridad 1</div>
+        <h3>Rediseñar el onboarding para llegar al umbral de activación</h3>
+        <p>El umbral identificado: 10 videos + 2 horas de watch time en el primer mes. El 91% de las usuarias activas lo supera. La mayoría de las churners no llega.</p>
+        <div class="action-detail">
+          <strong>Qué incluir en la primera semana:</strong><br>
+          1. Día 1: Bienvenida + "¿Cuál es tu objetivo?" (segmentación)<br>
+          2. Día 2: Guía de Nutrición más relevante para su objetivo (93% completion — el mejor contenido que tienen)<br>
+          3. Día 3–5: Primer entrenamiento del programa asignado<br>
+          4. Día 7: Check-in de progreso + invitación a comunidad<br><br>
+          <strong>Objetivo:</strong> Que llegue a 10 videos antes de que termine el trial.
+        </div>
+      </div>
+
+      <div class="action-card p2">
+        <div class="action-priority">🟠 Prioridad 2</div>
+        <h3>Secuencia de emails para leads que aceptaron recibir correo</h3>
+        <p>7.806 leads aceptaron recibir emails pero nunca convirtieron. Es una lista grande de personas que mostraron interés. Hoy probablemente no reciben nada.</p>
+        <div class="action-detail">
+          <strong>Qué hacer:</strong> Secuencia de 4–6 emails de nurturing (no de venta agresiva). Contenido: transformaciones reales, rutina de muestra gratuita, testimonios, FAQ de objeciones comunes.<br><br>
+          <strong>Segmentación:</strong> Separar las 375 de Abandoned Checkout (secuencia más directa) del resto (secuencia educativa más larga).<br><br>
+          <strong>Frecuencia:</strong> 1 email por semana durante 6 semanas.
+        </div>
+      </div>
+
+      <div class="action-card p2">
+        <div class="action-priority">🟠 Prioridad 2</div>
+        <h3>Migrar mensualeras a plan anual o trimestral</h3>
+        <p>El 81.6% del churn viene de mensualeras. El plan mensual las expone a decidir cada 30 días si se quedan. Las anuales churnearon 3x menos en el mes 1 y tienen 56 videos de mediana total.</p>
+        <div class="action-detail">
+          <strong>Qué hacer:</strong> En el mes 1–2, ofrecer upgrade al plan anual o trimestral con descuento temporal (ej: "pasá al anual hoy y ahorrá X% — oferta solo este mes").<br><br>
+          <strong>Timing:</strong> El mejor momento es cuando la usuaria está activa (semana 2–3, cuando ya usó la plataforma y el valor está fresco).<br><br>
+          <strong>No hacerlo cuando:</strong> La usuaria lleva 7 días sin entrar — en ese punto hay que reactivar primero.
+        </div>
+      </div>
+
+      <div class="action-card p2">
+        <div class="action-priority">🟠 Prioridad 2</div>
+        <h3>Onboarding urgente para suscriptoras Trimestral en semana 1</h3>
+        <p>28% de las trimestraleras churneadas no abrió la plataforma en los primeros 7 días. De ese 28%, la mediana de primera vista fue el día 151. Pagaron sin usar.</p>
+        <div class="action-detail">
+          <strong>El problema:</strong> El trimestral no tiene un onboarding diferenciado. Las trimestrales pagan 3 meses, no sienten urgencia, y dejan para "después" — que resulta ser el mes 5.<br><br>
+          <strong>Qué hacer:</strong> Secuencia de bienvenida específica para trimestral los días 1, 3 y 7: "Ya tenés 90 días — acá está tu plan para los primeros 30." Email + push con una rutina de 3 clases para arrancar esta semana.<br><br>
+          <strong>Dato clave:</strong> Las trimestraleras que enganchan en semana 1 → 40% llega a 50+ videos totales. La retención potencial del plan es alta si se activan.
+        </div>
+      </div>
+
+      <div class="action-card p2">
+        <div class="action-priority">🟠 Prioridad 2</div>
+        <h3>Re-engagement de anuales en Q3 (mes 6–9) antes del desenganche</h3>
+        <p>Las anuales empiezan con 27 videos en Q1 pero caen a 3 videos en Q4. El 39% no abre la plataforma en el último trimestre. No renuevan porque dejaron de sentir valor meses antes.</p>
+        <div class="action-detail">
+          <strong>Cuándo intervenir:</strong> Mes 6 del año (antes de que el desenganche sea irreversible). Si esperamos hasta el mes 11, la decisión ya está tomada.<br><br>
+          <strong>Qué hacer:</strong> Email en el mes 6 con "Tu año con Inner" — un resumen personalizado del progreso (X videos vistos, X horas entrenadas) + novedades de contenido reciente que no vio. Hacer visible el valor acumulado.<br><br>
+          <strong>Qué no hacer:</strong> Ofrecer descuento de renovación anticipada en el mes 6 — en ese punto aún no hay urgencia percibida. El descuento sirve en el mes 10–11.
+        </div>
+      </div>
+
+      <div class="action-card p2">
+        <div class="action-priority">🟠 Prioridad 2</div>
+        <h3>Forzar interacción social en la primera semana</h3>
+        <p>El 65.1% de las early churners no tuvo ninguna interacción social (0 comentarios, 0 favoritos, 0 agendado). Las que se conectan a la comunidad se quedan.</p>
+        <div class="action-detail">
+          <strong>Qué hacer:</strong><br>
+          — Prompt activo después del primer entrenamiento: "¿Cómo te fue? Contanos en los comentarios"<br>
+          — Desafío de primera semana: "Agendá tus 3 próximas clases y ganá un badge"<br>
+          — Bienvenida personalizada de la comunidad (mensaje de otra miembro activa)<br><br>
+          <strong>Objetivo:</strong> Que ninguna usuaria llegue al día 7 sin haber hecho al menos 1 acción social.
+        </div>
+      </div>
+
+      <div class="action-card p3">
+        <div class="action-priority">🟢 Prioridad 3</div>
+        <h3>Arreglar el tracking UTM en todas las campañas</h3>
+        <p>El 69.3% de los leads no tiene referrer y el 85%+ no tiene UTM. Las campañas están corriendo sin atribución de resultado.</p>
+        <div class="action-detail">
+          <strong>Qué hacer:</strong> Auditar todos los links activos en Instagram bio, stories, publicaciones pagas y orgánicas, y agregar UTM parameters (utm_source, utm_medium, utm_campaign, utm_content).<br><br>
+          <strong>Herramienta:</strong> Google Campaign URL Builder. Toma 1 hora hacer todos los links bien.<br><br>
+          <strong>Impacto futuro:</strong> Permite saber qué campañas traen leads que convierten vs. las que no.
+        </div>
+      </div>
+
+      <div class="action-card p3">
+        <div class="action-priority">🟢 Prioridad 3</div>
+        <h3>Reformatear los replays de clases largas</h3>
+        <p>Los replays de clases en vivo de 40–47 min tienen 5–10% de completion pese a ser los más vistos. El formato no funciona para consumo asincrónico.</p>
+        <div class="action-detail">
+          <strong>Opciones:</strong><br>
+          — Cortar los videos en segmentos de 15 min con capítulos<br>
+          — Crear versiones "highlights" de 15 min de las mejores clases<br>
+          — Añadir timestamps/capítulos para que la usuaria elija desde dónde ver<br><br>
+          <strong>Referencia:</strong> El Abs finisher de 7 min tiene 71% completion y es el video más agendado de toda la plataforma. El formato corto funciona.
+        </div>
+      </div>
+
+      <div class="action-card p3">
+        <div class="action-priority">🟢 Prioridad 3</div>
+        <h3>Programa de winback para Former con $0 LTV</h3>
+        <p>5.862 ex-suscriptoras con $0 de lifetime spend — nunca pagaron pero tuvieron una suscripción activa. Pueden ser trials no convertidos recuperables.</p>
+        <div class="action-detail">
+          <strong>Qué hacer:</strong> Segmentar este grupo y enviar una campaña de winback con oferta especial de "segunda oportunidad". Priorizar las que tuvieron más de 5 videos vistos (muestran que hubo interés).<br><br>
+          <strong>Mensaje:</strong> "Sabemos que no pudiste quedarte la primera vez. El contenido creció mucho — volvé con X% off tu primer mes."<br><br>
+          <strong>Nota:</strong> Primero confirmar si estas son trials expirados o pagos fallidos.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RESUMEN DE NEXT STEPS -->
+    <div class="card" style="margin-top:18px">
+      <h3>Resumen de acciones en orden de ejecución</h3>
+      <ul class="num-list">
+        <li><strong style="color:#e63946">HOY:</strong> Configurar email automático para Abandoned Checkout (375 usuarias). Acción con mayor ROI inmediato.</li>
+        <li><strong style="color:#e63946">SEMANA 1:</strong> Activar trigger de re-engagement a los 7 días sin actividad para mensualeras activas. Ventana de intervención confirmada: 16 días entre última vista y churn.</li>
+        <li><strong style="color:#e63946">SEMANA 1:</strong> Crear secuencia de bienvenida específica para Trimestral (días 1–3–7). El 28% no abre en semana 1 — si no se activan ahora, no volverán hasta el mes 5.</li>
+        <li><strong style="color:#e63946">SEMANA 1:</strong> Investigar qué provocó el pico de septiembre 2025 y el neto negativo de enero–febrero 2026 (-127 suscriptoras).</li>
+        <li><strong style="color:#f4821f">SEMANA 2:</strong> Rediseñar onboarding de Mensual: Nutrición en día 2, programa en día 3–5, check-in en día 7. Objetivo: que lleguen a 10 videos antes del fin del trial.</li>
+        <li><strong style="color:#f4821f">SEMANA 2:</strong> Diseñar encuesta de churn (NPS exit) para nuevas cancelaciones — especialmente anuales.</li>
+        <li><strong style="color:#f4821f">SEMANA 3:</strong> Armar secuencia de emails para los 7.806 leads que aceptaron recibir correo.</li>
+        <li><strong style="color:#f4821f">MES 2:</strong> Lanzar campaña de upgrade a anual/trimestral para mensualeras de 30–60 días (cuando están activas, semana 2–3).</li>
+        <li><strong style="color:#f4821f">MES 2:</strong> Configurar email de "Tu progreso con Inner" para anuales en el mes 6 — intervención preventiva antes del desenganche de Q3.</li>
+        <li><strong style="color:#2a9d5c">MES 2–3:</strong> Auditar y corregir todos los UTM links activos.</li>
+        <li><strong style="color:#2a9d5c">MES 3+:</strong> Reformatear replays de clases largas (40–47 min, 5–10% completion) en segmentos de 15 min.</li>
+      </ul>
+    </div>
+  </section>
+  </div><!-- /slide-5 -->
+
+</main>
+
+<footer>
+  <p>Diagnóstico de Churn · <span>Inner Space</span> · Febrero 2026</p>
+  <p style="margin-top:8px;font-size:11px">Fuente: Uscreen Advanced Analytics</p>
+</footer>
+
+<script>
+  const TOTAL_SLIDES = 6;
+  let current = 0;
+
+  function goToSlide(n) {
+    document.getElementById('slide-' + current).classList.remove('active');
+    document.querySelectorAll('.slide-tab')[current].classList.remove('active');
+    current = n;
+    document.getElementById('slide-' + current).classList.add('active');
+    document.querySelectorAll('.slide-tab')[current].classList.add('active');
+    document.getElementById('slideCounter').textContent = (current + 1) + ' / ' + TOTAL_SLIDES;
+    document.getElementById('btnPrev').disabled = current === 0;
+    document.getElementById('btnNext').disabled = current === TOTAL_SLIDES - 1;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) {
+    const next = current + dir;
+    if (next >= 0 && next < TOTAL_SLIDES) goToSlide(next);
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+  });
+</script>
+</body>
+</html>
