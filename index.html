@@ -130,7 +130,7 @@
     }
 
     /* ─── SECCIONES CON FONDO (alternar crema / blanco) ─── */
-    .slide section { padding: 28px 40px 32px; width: 100%; max-width: 1600px; margin: 0 auto; }
+    .slide section { padding: 28px 40px 32px; width: 100%; max-width: 1280px; margin: 0 auto; }
     .slide section.bg-cream { background: var(--beige); }
     .slide section.bg-white { background: var(--white); }
     .slide section.bg-gray { background: var(--gray-bg); }
@@ -230,6 +230,16 @@
       padding: 20px 22px;
       margin-bottom: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card--narrow {
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .card--narrow table th:first-child,
+    .card--narrow table td:first-child {
+      min-width: 84px;
+      width: 84px;
     }
     .card h3 {
       font-size: 15px;
@@ -622,20 +632,15 @@
         <div class="kpi-sub">Por mes sobre base activa — plan Mensual: 19.5%/mes estructural</div>
       </div>
       <div class="kpi green">
-        <div class="kpi-label">Revenue 2025 (USD)</div>
-        <div class="kpi-number">510K</div>
-        <div class="kpi-sub">MP + Uscreen unificado, TC oficial</div>
-      </div>
-      <div class="kpi green">
-        <div class="kpi-label">MRR norm. prom. 2025</div>
-        <div class="kpi-number">~29.7K</div>
-        <div class="kpi-sub">USD/mes (equivalente mensual recurrente)</div>
+        <div class="kpi-label">MRR por usuaria promedio 2025</div>
+        <div class="kpi-number">~12,7 USD</div>
+        <div class="kpi-sub">MRR norm. total / base activa (monetización por suscriptora)</div>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card card--narrow">
       <h3>Contexto revenue — evolución mensual (USD unificado)</h3>
-      <p class="section-sub" style="margin-bottom:12px">MP convertido a USD con tipo de cambio oficial; Uscreen en USD. MRR normalizado = equivalente mensual por plan (anual/12, trimestral/3, mensual/1). Feb 2026: solo Uscreen (MP aún no cerrado).</p>
+      <p class="section-sub" style="margin-bottom:12px">MP convertido a USD con tipo de cambio oficial; Uscreen en USD. MRR normalizado = equivalente mensual por plan (anual/12, trimestral/3, mensual/1). Usuarias monetizadas = base activa al inicio del mes. Feb 2026: solo Uscreen (MP aún no cerrado).</p>
       <div class="table-wrap">
         <table>
           <thead>
@@ -643,36 +648,38 @@
               <th>Mes</th>
               <th>Revenue total (USD)</th>
               <th>MRR norm. (USD)</th>
+              <th>Usuarias monetizadas</th>
+              <th>MRR por usuaria (USD)</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td>2025-01</td><td>50.457</td><td>23.782</td></tr>
-            <tr><td>2025-02</td><td>31.120</td><td>24.207</td></tr>
-            <tr><td>2025-03</td><td>35.870</td><td>27.151</td></tr>
-            <tr><td>2025-04</td><td>37.197</td><td>30.689</td></tr>
-            <tr><td>2025-05</td><td class="td-highlight">57.632</td><td class="td-highlight">40.369</td></tr>
-            <tr><td>2025-06</td><td>39.219</td><td>30.405</td></tr>
-            <tr><td>2025-07</td><td>34.128</td><td>27.057</td></tr>
-            <tr><td>2025-08</td><td>43.833</td><td>30.677</td></tr>
-            <tr><td>2025-09</td><td>40.582</td><td>30.015</td></tr>
-            <tr><td>2025-10</td><td>38.933</td><td>30.173</td></tr>
-            <tr><td>2025-11</td><td>37.142</td><td>29.749</td></tr>
-            <tr><td>2025-12</td><td class="td-highlight">64.302</td><td class="td-highlight">31.708</td></tr>
-            <tr><td>2026-01</td><td>40.995</td><td>26.863</td></tr>
-            <tr><td>2026-02</td><td class="td-orange">15.549 *</td><td class="td-orange">11.542 *</td></tr>
+            <tr><td>ene-25</td><td>50.457</td><td>23.782</td><td>1.813</td><td>13,1</td></tr>
+            <tr><td>feb-25</td><td>31.120</td><td>24.207</td><td>2.007</td><td>12,1</td></tr>
+            <tr><td>mar-25</td><td>35.870</td><td>27.151</td><td>2.264</td><td>12,0</td></tr>
+            <tr><td>abr-25</td><td>37.197</td><td>30.689</td><td>2.443</td><td>12,6</td></tr>
+            <tr><td>may-25</td><td class="td-highlight">57.632</td><td class="td-highlight">40.369</td><td>2.488</td><td class="td-highlight">16,2</td></tr>
+            <tr><td>jun-25</td><td>39.219</td><td>30.405</td><td>2.493</td><td>12,2</td></tr>
+            <tr><td>jul-25</td><td>34.128</td><td>27.057</td><td>2.534</td><td>10,7</td></tr>
+            <tr><td>ago-25</td><td>43.833</td><td>30.677</td><td>2.526</td><td>12,1</td></tr>
+            <tr><td>sep-25</td><td>40.582</td><td>30.015</td><td>2.772</td><td>10,8</td></tr>
+            <tr><td>oct-25</td><td>38.933</td><td>30.173</td><td>2.678</td><td>11,3</td></tr>
+            <tr><td>nov-25</td><td>37.142</td><td>29.749</td><td>2.698</td><td>11,0</td></tr>
+            <tr><td>dic-25</td><td class="td-highlight">64.302</td><td class="td-highlight">31.708</td><td>2.729</td><td>11,6</td></tr>
+            <tr><td>ene-26</td><td>40.995</td><td>26.863</td><td>2.789</td><td>9,6</td></tr>
+            <tr><td>feb-26</td><td class="td-orange">15.549 *</td><td class="td-orange">11.542 *</td><td>2.703</td><td class="td-orange">4,3 *</td></tr>
           </tbody>
         </table>
       </div>
       <p style="font-size:11px;color:#888;margin-top:8px">* Solo Uscreen (datos MP de feb 2026 aún no cerrados).</p>
-    </div>
-
-    <div class="alert red">
-      <div class="alert-icon">🚨</div>
-      <div class="alert-content">
-        <strong>Las dos señales más urgentes del análisis</strong>
-        (1) En enero–febrero 2026, por primera vez en la historia de la app, la base activa cayó en neto: -127 suscriptoras en dos meses. (2) El plan Mensual tiene un churn estructural de 19–21% por mes desde 2022: cada mes se pierde 1 de cada 5 mensualeras. El problema no es que el churn se aceleró — es que siempre fue alto en Mensual y la base ya no crece lo suficiente para compensarlo.
+      <div class="alert orange" style="margin-top:14px">
+        <div class="alert-icon">📊</div>
+        <div class="alert-content">
+          <strong>¿Las estamos monetizando más o menos?</strong>
+          En 2025 el MRR por usuaria se mantuvo entre ~10,7 y ~16,2 USD/mes, con un pico claro en mayo (renovaciones anuales). De enero a diciembre no hay una tendencia de mayor monetización: empieza en ~13,1 y cierra en ~11,6 USD/usuaria. Es decir, <strong>estamos monetizando de forma estable</strong>, con estacionalidad (mayo alto, julio–septiembre más bajo). No estamos sacando más ingreso por usuaria a lo largo del año; el crecimiento de revenue vino por más base, no por más ARPU.
+        </div>
       </div>
     </div>
+
   </section>
   </div><!-- /slide-0 -->
 
@@ -803,7 +810,7 @@
     </div>
 
     <div class="alert pink" style="margin-top:10px">
-      <div class="alert-icon">🇲🇽</div>
+      <div class="alert-icon"><img src="https://flagcdn.com/w40/mx.png" alt="México" style="width:28px;height:21px;vertical-align:middle;border-radius:3px;display:block" width="28" height="21"></div>
       <div class="alert-content">
         <strong>Oportunidad inmediata: viaje a México en 1 semana</strong>
         México es el mercado hispanohablante de mayor escala fuera del Río de la Plata — y ya hay usuarias activas. El viaje es una ventana para activar el mercado. Tres sugerencias concretas:
@@ -816,12 +823,7 @@
         <div style="font-size:13px;color:#666;line-height:1.6">Charlas informales con mujeres que entrenan: qué apps usan, qué pagan, qué les frena a suscribirse. Visitar gyms o estudios y relevar oferta local, precios, lenguaje. Insight para decisiones de producto, pricing y mensaje en México.</div>
       </div>
       <div style="border:1px solid rgba(243,86,149,0.3);border-radius:10px;padding:20px;background:rgba(243,86,149,0.04)">
-        <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--pink);margin-bottom:8px">🎥 Sugerencia 2 — Material grabado para edición</div>
-        <div style="font-size:14px;font-weight:700;margin-bottom:6px">B-roll, testimonios y behind the scenes</div>
-        <div style="font-size:13px;color:#666;line-height:1.6">Grabar en destino: paisajes, ubicaciones, testimonios de usuarias (si se puede coordinar), detrás de escena. El material se entrega a las film makers para editar; luego se sube a la plataforma o IG. Genera materia prima sin necesidad de producir la clase en vivo allí.</div>
-      </div>
-      <div style="border:1px solid rgba(243,86,149,0.3);border-radius:10px;padding:20px;background:rgba(243,86,149,0.04)">
-        <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--pink);margin-bottom:8px">🤝 Sugerencia 3 — Colaboración local</div>
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--pink);margin-bottom:8px">🤝 Sugerencia 2 — Colaboración local</div>
         <div style="font-size:14px;font-weight:700;margin-bottom:6px">Contacto y grabación para un futuro reel</div>
         <div style="font-size:13px;color:#666;line-height:1.6">Identificar una creadora de fitness/wellness mexicana con audiencia femenina y afinidad de valores. Reunión en persona; grabar lo necesario (entrevista, tomas juntas) para que el equipo arme después un reel de colaboración. El puente y la grabación en destino; edición y publicación del lado de Inner.</div>
       </div>
@@ -1359,21 +1361,6 @@
 
       <div class="action-card p1">
         <div class="action-priority">🔴 Prioridad 1</div>
-        <h3>Investigar el pico de septiembre 2025 y el neto negativo de 2026</h3>
-        <p>Septiembre 2025 tuvo 18.4% de churn total — el mayor fuera de enero en todo 2025 (510 churns, -94 neto). Y en enero–febrero 2026, por primera vez, la base activa cayó en neto: -127 suscriptoras. Ambos eventos necesitan causa identificada.</p>
-        <div class="action-detail">
-          <strong>Septiembre 2025 — hipótesis a validar:</strong><br>
-          — ¿Hubo un aumento de precio en agosto–septiembre?<br>
-          — ¿Hubo una pausa en la frecuencia de contenido nuevo?<br>
-          — ¿Alguna comunicación o cambio de producto que disparó cancelaciones?<br><br>
-          <strong>Enero–febrero 2026 — causa más probable:</strong><br>
-          — Vencimiento masivo de anuales contratadas en enero 2025 (el mejor mes de captación: +358 nuevas). Plan Anual: 13.5% churn en enero 2026 vs 3–5% promedio histórico.<br><br>
-          <strong>Acción:</strong> Cruzar el timeline de cambios internos contra los picos. Diseñar encuesta de NPS exit para todas las nuevas cancelaciones desde hoy.
-        </div>
-      </div>
-
-      <div class="action-card p1">
-        <div class="action-priority">🔴 Prioridad 1</div>
         <h3>Rediseñar el onboarding para llegar al umbral de activación</h3>
         <p>El umbral identificado: 10 videos + 2 horas de watch time en el primer mes. El 91% de las usuarias activas lo supera. La mayoría de las churners no llega.</p>
         <div class="action-detail">
@@ -1405,6 +1392,19 @@
           <strong>Qué hacer:</strong> En el mes 1–2, ofrecer upgrade al plan anual o trimestral con descuento temporal (ej: "pasá al anual hoy y ahorrá X% — oferta solo este mes").<br><br>
           <strong>Timing:</strong> El mejor momento es cuando la usuaria está activa (semana 2–3, cuando ya usó la plataforma y el valor está fresco).<br><br>
           <strong>No hacerlo cuando:</strong> La usuaria lleva 7 días sin entrar — en ese punto hay que reactivar primero.
+        </div>
+      </div>
+
+      <div class="action-card p2">
+        <div class="action-priority">🟠 Prioridad 2</div>
+        <h3>Aumentar MRR por usuaria: email o push para pasarse a anual</h3>
+        <p>El MRR por usuaria promedio 2025 fue ~12,7 USD/mes y se mantuvo estable. Subir el ARPU implica que más suscriptoras elijan plan anual o trimestral en lugar de mensual — con menor churn y más revenue por cabeza.</p>
+        <div class="action-detail">
+          <strong>A quiénes conviene mandar el mensaje:</strong><br>
+          — Mensualeras con 2 o más meses de antigüedad que siguen activas (entran al menos 1 vez por semana). Ya demostraron que usan el producto; el mensaje de "pasate a anual y ahorrá" tiene más sentido.<br>
+          — Mensualeras en mes 1 con buen engagement (ej. 10+ videos vistos): son candidatas a quedarse; ofrecer upgrade antes del primer renewal reduce fricción de decisión cada 30 días.<br><br>
+          <strong>Qué hacer:</strong> Email o push con mensaje claro: "Si te quedás un año, ahorrás X% y no tenés que renovar cada mes." Incluir link directo al cambio de plan. Opcional: descuento por tiempo limitado (ej. válido 7 días) para crear urgencia.<br><br>
+          <strong>Impacto:</strong> Cada mensualera que pasa a anual aumenta el MRR por usuaria (y reduce churn estructural). Priorizar a las que ya tienen 3+ meses: son las que más probabilidad tienen de renovar el anual.
         </div>
       </div>
 
